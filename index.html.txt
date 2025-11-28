@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Bücür’e Özel Görevli Oyun</title>
+<style>
+body{margin:0;overflow:hidden;font-family:Arial,sans-serif;background:linear-gradient(180deg,#ffe6f2,#fff0f7)}
+.bg-heart{position:fixed;font-size:90px;color:rgba(255,80,140,0.1);animation:floatBg 12s linear infinite;pointer-events:none;user-select:none}
+@keyframes floatBg{0%{transform:translateY(110vh) rotate(0deg)}100%{transform:translateY(-20vh) rotate(360deg)}}
+#intro{position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(255,240,246,0.96);display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:20px;z-index:2000}
+#intro h1{font-size:42px;color:#ff2d6f;margin-bottom:12px}
+#intro p{width:90%;font-size:18px;color:#444;margin-bottom:16px}
+#girlPhoto{width:200px;height:200px;border-radius:20px;object-fit:cover;box-shadow:0 8px 20px rgba(0,0,0,0.15);cursor:pointer;margin-bottom:10px;transition:transform 0.2s}
+#girlPhoto:active{transform:scale(1.05)}
+#storyText{width:90%;font-size:16px;color:#555;margin-bottom:16px}
+#startBtn{padding:14px 28px;border:none;background:#ff2d6f;color:white;font-size:20px;border-radius:14px;cursor:pointer;transition:0.2s}
+#startBtn:active{transform:scale(1.05)}
+#gameArea{position:relative;width:100vw;height:100vh}
+.heart{width:60px;height:60px;position:absolute;cursor:pointer;transition:0.12s;user-select:none}
+#message{position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:white;padding:12px 18px;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,0.15);display:none;font-size:20px;z-index:1200;text-align:center}
+#taskMsg{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:white;padding:12px 18px;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,0.15);font-size:20px;z-index:1200;text-align:center}
+#final{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:white;padding:30px;border-radius:20px;text-align:center;display:none;z-index:3000;box-shadow:0 20px 50px rgba(0,0,0,0.2);animation:fadeIn 1s}
+#final h1{font-size:32px;margin:0 0 10px 0;color:#ff2d6f}
+#final p{font-size:18px;color:#444;margin:0}
+.confetti{position:fixed;width:10px;height:14px;pointer-events:none;z-index:4000}
+@keyframes fadeIn{0%{opacity:0;transform:translate(-50%,-60%)}100%{opacity:1;transform:translate(-50%,-50%)}} 
+</style>
+</head>
+<body>
+
+<div class="bg-heart" style="left:5%;animation-delay:0s;">❤️</div>
+<div class="bg-heart" style="left:25%;font-size:70px;animation-delay:2s;">❤️</div>
+<div class="bg-heart" style="left:55%;font-size:110px;animation-delay:4s;">❤️</div>
+<div class="bg-heart" style="left:75%;font-size:80px;animation-delay:1s;">❤️</div>
+
+<div id="intro">
+<h1>Bücür’e Özel</h1>
+<img id="girlPhoto" src="https://picsum.photos/300" alt="Fotoğraf">
+<p id="storyText">Buraya kısa ve tatlı bir hikâye yazabilirsin, Bücür’ün doğum günü için özel ❤️</p>
+<p>BÜCÜRRR İYKİ DOĞDUNN BAŞ TACISINN BUNU MUTLU OLMANI DİLEYEREK YAZIYORM  ❤️</p>
+<button id="startBtn">Başla</button>
+</div>
+
+<div id="gameArea"></div>
+<div id="message">HELALL BÜCÜRRR ❤️</div>
+<div id="taskMsg">Görev 1: İlk 2 KALBİ yakala! ❤️</div>
+<div id="final">
+<h1>BÜCÜRRRR İYİKİ DOĞDUNNN İYİKİ VARSINNN BAİ TACISINNN 🎂</h1>
+<p>MUTLU SENELEREEE EE ❤️</p>
+</div>
+
+<audio id="bgm" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_0b71ab0ae0.mp3?filename=romantic-ambient-111288.mp3" loop></audio>
+<audio id="pop" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_7f00e9cc34.mp3?filename=pop-94319.mp3"></audio>
+<audio id="win" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_7e866d816c.mp3?filename=success-1-6297.mp3"></audio>
+
+<script>
+const NOTES = {
+  intro: "BÜCÜRRR İYKİ DOĞDUNN BAŞ TACISINN BUNU MUTLU OLMANI DİLEYEREK YAZIYORM  ❤️",
+  tasks: [
+    "Görev 1: İlk 2 KALBİ yakala! ❤️",
+    "Görev 2: BİRAZ HIZLI OL BÜCÜR! 💨",
+    "Görev 3: BUDA HEDİYE OLSUN HADİ! 🎁",
+    "Görev 4: Şimdi en çok sevdiğin kalpleri yakala! 💖",
+    "Görev 5: SON BABA BUNLAR! 🏁",
+    "Görev 6: AFERİM BÜCÜR BAŞKA KALMADI MAALESEF SON BUNLAR! 🎉"
+  ],
+  taskCompletePrefix: "TEBRİKLERRR BÜCÜRRRRR! 🎉 ",
+  finalTitle: "BÜCÜRRRR İYİKİ DOĞDUNNN İYİKİ VARSINNN BAİ TACISINNN 🎂",
+  finalText: "MUTLU SENELEREEE EE ❤️",
+  aferimText: "HELALL BÜCÜRRR ❤️"
+};
+
+const TOTAL=20;
+const TASKS=[2,4,6,8,10,12];
+let currentTask=0, collected=0, hearts=[];
+
+const gameArea=document.getElementById("gameArea");
+const message=document.getElementById("message");
+const final=document.getElementById("final");
+const bgm=document.getElementById("bgm");
+const pop=document.getElementById("pop");
+const win=document.getElementById("win");
+const taskMsg=document.getElementById("taskMsg");
+
+document.getElementById("girlPhoto").onclick = () => {
+  let url = prompt("Fotoğraf URL’si gir:"); 
+  if(url) document.getElementById("girlPhoto").src = url;
+};
+
+document.getElementById("storyText").onclick = () => {
+  let text = prompt("Hikâyeyi yaz:"); 
+  if(text) document.getElementById("storyText").innerText = text;
+};
+
+document.getElementById("startBtn").onclick=()=>{
+  document.getElementById("intro").style.display="none";
+  bgm.play();
+  startGame();
+};
+
+function random(min,max){return Math.random()*(max-min)+min}
+
+function spawnHeart(){
+  const h=document.createElement("img");
+  h.src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23ff2d6f' d='M12 21s-7.5-4.86-10.18-8.02C-0.09 8.6 3.28 3 8.5 4.6 11 5.45 12 8 12 8s1-2.55 3.5-3.4C20.72 3 24.09 8.6 22.18 12.98 19.5 16.14 12 21 12 21z'/></svg>";
+  h.className="heart";
+  h.style.left=random(40,window.innerWidth-100)+"px";
+  h.style.top=random(100,window.innerHeight-140)+"px";
+  h.dataset.vx=random(-0.6,0.6); h.dataset.vy=random(-0.4,0.4);
+  h.onclick=()=>{
+    pop.play(); 
+    h.remove(); 
+    collected++;
+    message.innerText=NOTES.aferimText; 
+    message.style.display="block";
+    setTimeout(()=>message.style.display="none",900);
+    burstConfetti(parseFloat(h.style.left),parseFloat(h.style.top));
+    checkTask();
+  };
+  gameArea.appendChild(h); 
+  return h;
+}
+
+function burstConfetti(x,y){
+  const colors=['#ff6aa6','#ffd166','#6fe7ff','#a9ffbf','#ffd1f5'];
+  for(let i=0;i<12;i++){
+    const c=document.createElement('div');c.className='confetti';
+    c.style.left=x+'px'; c.style.top=y+'px'; c.style.background=colors[i%colors.length];
+    document.body.appendChild(c);
+    let vx=random(-8,8), vy=random(-18,-4), tt=0, rot=random(-600,600);
+    let id=setInterval(()=>{
+      tt+=16;
+      c.style.left=(x+vx*(tt/16))+'px'; 
+      c.style.top=(y+vy*(tt/16)+0.32*0.5*(tt/16*tt/16))+'px'; 
+      c.style.opacity=Math.max(0,1-tt/900); 
+      c.style.transform='rotate('+(rot*(tt/1000))+'deg)'; 
+      if(tt>900){clearInterval(id);c.remove();}
+    },16);
+  }
+}
+
+function startGame(){for(let i=0;i<TOTAL;i++){setTimeout(()=>hearts.push(spawnHeart()),i*150);} animate();}
+
+function animate(){hearts.forEach(h=>{if(!h.parentNode) return; let x=parseFloat(h.style.left),y=parseFloat(h.style.top); let vx=parseFloat(h.dataset.vx),vy=parseFloat(h.dataset.vy); x+=vx;y+=vy; if(x<0||x>window.innerWidth-80) h.dataset.vx=-vx; if(y<50||y>window.innerHeight-100) h.dataset.vy=-vy; h.style.left=x+'px'; h.style.top=y+'px';}); requestAnimationFrame(animate);}
+
+function checkTask(){
+  if(collected>=TASKS[currentTask]){
+    taskMsg.innerText=NOTES.taskCompletePrefix+NOTES.tasks[currentTask];
+    currentTask++;
+    setTimeout(()=>{
+      if(currentTask<TASKS.length){
+        taskMsg.innerText=NOTES.tasks[currentTask];
+      } else {
+        win.play();
+        final.style.display="block";
+        taskMsg.style.display="none";
+      }
+    },1200);
+  }
+}
+</script>
+</body>
+</html>
